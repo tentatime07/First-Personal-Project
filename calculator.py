@@ -1,16 +1,21 @@
 def add(x, y):
     return x + y
 
-hi = input("type first number to add here: ")
-if not hi.isnumeric():
-    raise KeyError()
-hi2 = input("type second number to add here: ")
+while True:
+    try:
+        first_input = float(input("type first number to add here: "))
+        break
+    except ValueError:
+        print("please choose a number")
+    
+while True:
+    try:
+        second_input = float(input("type second number to add here: "))
+        break
+    except ValueError:
+        print("please choose a number")
 
-if not hi2.isnumeric():
-    raise KeyError()
-
-
-sum = float(hi) + float(hi2)
+sum = add(first_input, second_input)
 res = input("ready to see sum? type yes or no here: ")
 
 if res == "yes":
