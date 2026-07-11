@@ -1,72 +1,105 @@
-from operations import *
+import operations
 
-operations = {}
-operations["+"] = add
-operations["-"] = subtract
-operations["*"] = multiply
-operations["/"] = divide
+OPERATIONS = {
+    "+": operations.add,
+    "-": operations.subtract,
+    "*": operations.multiply,
+    "/": operations.divide,
+    "^": operations.exponent,
+    "%": operations.modulo,
+}
 
-def getname():
-    return input("What's your name?: ")
+def get_name():
+        return input("What's your name?: ")
 
-def getoperation(prompt):
+def get_operation(prompt):
     while True:
-        operation = input(prompt)
-        if operation in operations:
-            return [operations[operation], operation]
+        symbol = input(prompt).strip()
+        if symbol in OPERATIONS:
+            return symbol, OPERATIONS[symbol]
         else:
-            print("not a valid operation, try again")
-            
-def getnumber(prompt):
-    while True:
-        try: 
-            number = float(input(prompt))
-            return number
-        except ValueError:
-            print("not a valid number, try again")
+            print("Not a valid operation, try again")
 
-def getnumberdiv(prompt):
-    while True:
-        try: 
-            number = float(input(prompt))
-            if number == 0:
-                print("cannot divide by zero, try again")
-            else:
-                return number
-        except ValueError:
-            print("not a valid number, try again")
-        
-def getrestart(prompt):
+def get_number(prompt, allow_zero, allow_ans, ans):
     while True:
         res = input(prompt).strip().lower()
-        if res == "y":
-            return True
-        elif res == "n":
-            return False
-    
+        if res == "ans":
+            if allow_ans:
+                return ans
+            else:
+                print("No previous ans available yet")
+                continue
+        else: 
+            try:
+                number = float(res)
+            except ValueError:
+                print("Not a valid number, try again")
+        if not allow_zero and number == 0:
+            print("cannot divide/mod by zero")
+        else:
+            return number
+
+def get_next_action(prompt, history, name):
+    while True:
+        res = input(prompt).strip().lower()
+        if res == "e":
+            print(f"Goodbye! See you {name}.")
+            return "exit"
+        elif res == "v":
+            print_history(history)
+        elif res == "c":
+            history.clear()
+            print("history cleared!")
+        elif res == "a":
+            return 
+        else: 
+            print("not a valid input")
+
+def print_history(history):
+    if not history:
+        print("History is empty!")
+        return
+    print("\nCalculation history:")
+    for calculation in history:
+        print(calculation)
     
 def start():
+    history = []
     first = True
+    result = 0
+
     print("Welcome to Tommy's calculator.")
-    name = getname()
+    name = get_name()
+
     while True:
         if first:
-            operation = getoperation("Hi " + name + ". To start, choose an operator. Type +, -, *, or /: ")
+            prompt = f"Hi {name}. To start, choose an operator. Type +, -, *, /, ^, or %: "
         else:
-            operation = getoperation("Sure " + name + ". To start, choose an operator. Type +, -, *, or /: ")
-        number1 = getnumber("Now, choose your first number: ")
-        if operation[1] == "/":
-            number2 = getnumberdiv("Now, choose your second number: ")
+            prompt = f"Sure {name}. To start, choose an operator. Type +, -, *, /, ^, or %: "
+
+        symbol, operation_func = get_operation(prompt)
+
+        if first:
+            number1 = get_number("Now, choose your first number: ", True, False, result)
+            number2 = get_number("Now, choose your second number: ", symbol not in ("/", "%"), False, result)
         else:
-            number2 = getnumber("Now, choose your second number: ")
-        print(str(number1) + " " + operation[1] + " " + str(number2) + " = " + str(operation[0](number1, number2)))
-        res = getrestart("Would you like to do another calculation? y or n: ")
-        first = False
-        if not res:
-            print("Goodbye! See you " + name + ".")
+            number1 = get_number(f"Now, choose your first number, or type ans (ans = {result}): ", True, True, result)
+            number2 = get_number(f"Now, choose your second number, or type ans (ans = {result}): ", symbol not in ("/", "%"), True, result)
+
+        result = operation_func(number1, number2)
+        calculation = f"{number1} {symbol} {number2} = {result}"
+
+        print(calculation)
+        history.append(calculation)
+        print("Calculation history updated!")
+
+        action = get_next_action("\nv for view history\nc for clear history\na for another calculation\ne for exit (history will not save)\n", history, name)
+        if action == "exit":
             break
+        first = False
 
 start()
+
 
 
 
