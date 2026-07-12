@@ -34,6 +34,7 @@ def get_number(prompt, allow_zero, allow_ans, ans):
                 number = float(res)
             except ValueError:
                 print("Not a valid number, try again")
+                continue
         if not allow_zero and number == 0:
             print("cannot divide/mod by zero")
         else:
